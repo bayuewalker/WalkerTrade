@@ -1,2 +1,2 @@
-/** Fundamental provider contracts and event guards are introduced in issue #13. */
-export const fundamentalsModule = '@walkertrade/fundamentals' as const;
+export { FundamentalContextSchema } from '@walkertrade/core';
+export type { FundamentalContext } from '@walkertrade/core';

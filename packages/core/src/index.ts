@@ -1,5 +1,7 @@
 import pino, { type Logger, type LoggerOptions } from 'pino';
 
+export * from './protocol';
+
 export type LogLevel = Exclude<LoggerOptions['level'], undefined>;
 
 export interface LoggerOptionsInput {

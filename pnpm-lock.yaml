@@ -72,7 +72,11 @@ importers:
         specifier: ^4.19.3
         version: 4.23.15
 
-  packages/analysis: {}
+  packages/analysis:
+    dependencies:
+      '@walkertrade/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/config:
     dependencies:
@@ -85,18 +89,37 @@ importers:
       pino:
         specifier: ^9.6.0
         version: 9.14.0
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
 
   packages/db: {}
 
-  packages/fundamentals: {}
+  packages/fundamentals:
+    dependencies:
+      '@walkertrade/core':
+        specifier: workspace:*
+        version: link:../core
 
-  packages/market-data: {}
+  packages/market-data:
+    dependencies:
+      '@walkertrade/core':
+        specifier: workspace:*
+        version: link:../core
 
   packages/notifications: {}
 
-  packages/signals: {}
+  packages/signals:
+    dependencies:
+      '@walkertrade/core':
+        specifier: workspace:*
+        version: link:../core
 
-  packages/vantage: {}
+  packages/vantage:
+    dependencies:
+      '@walkertrade/core':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
