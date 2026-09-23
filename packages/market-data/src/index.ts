@@ -1,2 +1,7 @@
-/** Normalized market contracts and provider adapters are introduced in issue #10. */
-export const marketDataModule = '@walkertrade/market-data' as const;
+export {
+  CandleSchema,
+  CandleSeriesSchema,
+  MarketSnapshotSchema,
+  QuoteSchema,
+} from '@walkertrade/core';
+export type { Candle, CandleSeries, MarketSnapshot, Quote } from '@walkertrade/core';

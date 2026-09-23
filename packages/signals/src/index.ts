@@ -1,2 +1,2 @@
-/** Signal validation and lifecycle logic are introduced in issue #15. */
-export const signalsModule = '@walkertrade/signals' as const;
+export { SignalEventSchema, SignalSchema } from '@walkertrade/core';
+export type { Signal, SignalEvent } from '@walkertrade/core';
