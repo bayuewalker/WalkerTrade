@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@walkertrade/core": ["packages/core/src/index.ts"],
+      "@walkertrade/config": ["packages/config/src/index.ts"],
+      "@walkertrade/db": ["packages/db/src/index.ts"],
+      "@walkertrade/market-data": ["packages/market-data/src/index.ts"],
+      "@walkertrade/fundamentals": ["packages/fundamentals/src/index.ts"],
+      "@walkertrade/analysis": ["packages/analysis/src/index.ts"],
+      "@walkertrade/vantage": ["packages/vantage/src/index.ts"],
+      "@walkertrade/signals": ["packages/signals/src/index.ts"],
+      "@walkertrade/notifications": ["packages/notifications/src/index.ts"]
+    }
+  },
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "packages/**/*.ts",
+    "vitest.config.ts",
+    "eslint.config.mjs"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@walkertrade/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@walkertrade/config": "workspace:*",
+    "@walkertrade/core": "workspace:*",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3"
+  }
+}
