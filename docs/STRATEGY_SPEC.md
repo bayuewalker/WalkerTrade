@@ -36,8 +36,10 @@ Detect:
 - Swing highs/lows
 - Displacement
 - Fair Value Gap
-- Order Block
+- Order Block candidate
 - Premium / Discount
+
+Every SMC primitive must have deterministic evidence from candle data.
 
 ## Strategy rules
 
@@ -48,7 +50,7 @@ Liquidity Sweep Reversal:
 3. Displacement appears.
 4. M5/M15 MSS or CHOCH confirms reversal.
 5. Retracement reaches FVG / valid execution zone.
-6. Structural stop exists.
+6. Structural invalidation exists.
 7. Expected RR >= 1.5.
 
 ### WT-SMC-TC
@@ -58,6 +60,7 @@ Trend Continuation:
 3. Counter-trend liquidity is taken.
 4. LTF structure realigns with HTF.
 5. Entry is not extended.
+6. Expected RR >= 1.5.
 
 ### WT-SMC-BR
 Breakout + Retest:
@@ -65,6 +68,7 @@ Breakout + Retest:
 2. Breakout is not a weak wick-only break.
 3. Retest holds.
 4. Sufficient room remains to opposing liquidity.
+5. Expected RR >= 1.5.
 
 ### WT-SMC-REV
 HTF Reversal:
@@ -72,6 +76,7 @@ HTF Reversal:
 2. Significant liquidity event occurs.
 3. LTF reversal structure confirms.
 4. Fundamental/news context does not invalidate the setup.
+5. Expected RR >= 1.5.
 
 ## AI score
 
@@ -85,7 +90,10 @@ HTF Reversal:
 - Risk/reward: 5
 
 Thresholds:
-- <75: reject
-- 75-79: watch
-- 80-84: signal only
-- >=85: auto-trade eligible, still subject to AEGIS
+- <75: REJECT
+- 75–79: internal WATCH
+- 80–84: early/watch setup; optional notification
+- 85–89: VALID SIGNAL
+- >=90: A+ SIGNAL
+
+A score never bypasses stale-data, event-risk, duplicate, expiry, or RR validation.
