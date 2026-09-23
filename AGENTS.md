@@ -1,54 +1,85 @@
-# WalkerTrade Agent Contract
+# WalkerTrade Engineering Agent Contract
 
-## VANTAGE
+## Current product scope
 
-Role: market intelligence and strategy.
+**WalkerTrade Web Signal v0.1 only.**
 
-Inputs:
-- MT5 price/market data
-- multi-timeframe structure
-- technical features
-- SMC features
-- account-neutral market context
-- fundamental/news context when available
+Do not implement MT5, order execution, funded-account execution, or broker connectivity unless a future issue explicitly reactivates that scope.
 
-Outputs:
-- WAIT
-- REJECT
-- TRADE_PROPOSAL
-- THESIS_UPDATE
+## Mandatory context
 
-VANTAGE must never:
-- choose final lot size
-- bypass AEGIS
-- directly place MT5 orders
+Before coding, read:
+1. `ARCHITECTURE.md`
+2. `ROADMAP.md`
+3. `WORKING_PLAN.md`
+4. `docs/STRATEGY_SPEC.md`
+5. The assigned GitHub issue
 
-## AEGIS
+The issue is the implementation boundary.
 
-Role: deterministic risk guard and execution authority.
+## Codex workflow
 
-Inputs:
-- VANTAGE proposal
-- live MT5 account state
-- symbol specifications
-- current positions/orders
-- configured funded-account limits
+- One GitHub issue per implementation branch/PR.
+- Branch format: `codex/<issue-number>-short-name`
+- PR title must reference the issue.
+- Do not make unrelated refactors.
+- Do not modify infrastructure unless the issue includes it.
+- Add/update tests for changed behavior.
+- Preserve strict TypeScript typing.
+- Do not commit API keys, tokens, credentials, or production secrets.
+- Use environment variables through the central config module.
+- External providers must sit behind interfaces/adapters.
+- Network-dependent code must have mocks/fixtures.
+- A provider failure must not fabricate data.
+- Signal-generating behavior must be deterministic before the VANTAGE AI stage.
+- AI output must be schema-validated before use.
+- Never rewrite historical signal outcomes.
 
-Outputs:
-- APPROVED
-- REJECTED
-- EXECUTION_REPORT
-- POSITION_ACTION
+## Architecture boundaries
 
-AEGIS must never:
-- invent an independent market thesis
-- increase risk after a loss
-- bypass configured hard limits
+### Deterministic engines
+Own:
+- market normalization
+- technical indicators
+- SMC detection
+- candidate generation
+- RR calculation
+- signal deduplication
+- signal lifecycle/outcome tracking
 
-## Chain of authority
+### VANTAGE AI
+Owns:
+- contextual interpretation
+- confluence evaluation
+- fundamental + technical synthesis
+- final setup score/explanation
 
-```text
-VANTAGE -> AEGIS -> MT5
-```
+AI must not invent missing market or fundamental inputs.
 
-A trade is invalid if it skips any stage.
+## Definition of done for every issue
+
+- Acceptance criteria satisfied
+- Tests passing for changed scope
+- No placeholder production logic hidden behind TODOs
+- Error paths handled
+- Structured logging included where operationally relevant
+- README/docs changed if public behavior/config changed
+- PR describes test evidence and remaining limitations
+
+## Current runtime
+
+- Fly.io
+- Supabase
+- Twelve Data
+- Trading Economics
+- TypeScript
+- Next.js web
+- Node/TypeScript long-running worker
+
+## Out of scope
+
+- MT5
+- broker order execution
+- position sizing for live accounts
+- copy trading
+- exchange execution
