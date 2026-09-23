@@ -1,0 +1,32 @@
+{
+  "name": "walkertrade",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9.15.0"
+  },
+  "scripts": {
+    "dev:web": "pnpm --filter @walkertrade/web dev",
+    "dev:worker": "pnpm --filter @walkertrade/worker dev",
+    "build": "pnpm --filter @walkertrade/web build && pnpm --filter @walkertrade/worker build",
+    "lint": "eslint .",
+    "format": "prettier --write package.json pnpm-workspace.yaml tsconfig.json eslint.config.mjs vitest.config.ts .prettierrc.json README.md \"apps/**/*.{ts,tsx,json}\" \"packages/**/*.{ts,json}\"",
+    "format:check": "prettier --check package.json pnpm-workspace.yaml tsconfig.json eslint.config.mjs vitest.config.ts .prettierrc.json README.md \"apps/**/*.{ts,tsx,json}\" \"packages/**/*.{ts,json}\"",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/node": "^22.13.4",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "eslint": "^9.20.1",
+    "globals": "^15.15.0",
+    "prettier": "^3.5.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0",
+    "vitest": "^3.0.7"
+  }
+}
