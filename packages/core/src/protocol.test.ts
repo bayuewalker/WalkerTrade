@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import {
   CandidateSetupSchema,
+  MarketSnapshotSchema,
   PROTOCOL_SCHEMA_VERSION,
   VantageDecisionSchema,
+  VantageRequestSchema,
   validateVantageDecision,
 } from './protocol.js';
 import type { CandidateSetup } from './protocol.js';
@@ -54,10 +56,140 @@ const decision = {
   timestamp,
 };
 
+const fresh = {
+  status: 'FRESH' as const,
+  sourceTimestamp: timestamp,
+  observedAt: timestamp,
+  ageMs: 1_000,
+  maxAgeMs: 60_000,
+};
+
+function createSeries(timeframe: 'M5' | 'M15' | 'H1' | 'H4') {
+  return {
+    symbol: 'XAU/USD',
+    timeframe,
+    provider: 'fixture',
+    fetchedAt: timestamp,
+    freshness: fresh,
+    candles: [
+      {
+        symbol: 'XAU/USD',
+        timeframe,
+        openTime: '2026-09-23T11:55:00.000Z',
+        closeTime: timestamp,
+        open: 2650,
+        high: 2652,
+        low: 2649,
+        close: 2651,
+        volume: 100,
+        isClosed: true,
+      },
+    ],
+  };
+}
+
+const marketSnapshot = {
+  snapshotId: candidate.marketSnapshotId,
+  schemaVersion: PROTOCOL_SCHEMA_VERSION,
+  symbol: candidate.symbol,
+  generatedAt: timestamp,
+  quote: {
+    symbol: candidate.symbol,
+    provider: 'fixture',
+    price: 2651,
+    asOf: timestamp,
+    freshness: fresh,
+  },
+  candles: {
+    M5: createSeries('M5'),
+    M15: createSeries('M15'),
+    H1: createSeries('H1'),
+    H4: createSeries('H4'),
+  },
+  freshness: fresh,
+};
+
+const vantageRequest = {
+  requestId: 'request-xau-001',
+  schemaVersion: PROTOCOL_SCHEMA_VERSION,
+  requestedAt: timestamp,
+  candidate,
+  marketSnapshot,
+  technicalContext: {
+    schemaVersion: PROTOCOL_SCHEMA_VERSION,
+    snapshotId: marketSnapshot.snapshotId,
+    computedAt: timestamp,
+    freshness: fresh,
+    marketRegime: 'TRENDING_UP',
+    h4Bias: 'BULLISH',
+    h1Bias: 'BULLISH',
+    indicators: { ema20: 2650, ema50: 2648, rsi: 55, atr: 10 },
+    sessionContext: candidate.sessionContext,
+    evidence: candidate.technicalEvidence,
+  },
+  smcContext: {
+    schemaVersion: PROTOCOL_SCHEMA_VERSION,
+    snapshotId: marketSnapshot.snapshotId,
+    computedAt: timestamp,
+    freshness: fresh,
+    structure: [],
+    liquidity: [],
+    evidence: candidate.smcEvidence,
+  },
+  fundamentalContext: {
+    schemaVersion: PROTOCOL_SCHEMA_VERSION,
+    symbol: candidate.symbol,
+    generatedAt: timestamp,
+    freshness: fresh,
+    eventRisk: 'NORMAL',
+    events: [],
+    summary: 'No high-impact event lockout.',
+  },
+};
+
+function nonFresh(status: 'STALE' | 'UNKNOWN') {
+  return status === 'STALE' ? { ...fresh, status, ageMs: 60_001 } : { ...fresh, status };
+}
+
 describe('VANTAGE protocol schemas', () => {
   it('accepts a structurally valid deterministic candidate', () => {
     expect(CandidateSetupSchema.parse(candidate)).toMatchObject(candidate);
   });
+
+  it.each([
+    ['M5', 'M15'],
+    ['M15', 'H1'],
+    ['H1', 'H4'],
+    ['H4', 'M5'],
+  ] as const)('rejects a %s snapshot key containing a %s series', (key, wrongTimeframe) => {
+    expect(
+      MarketSnapshotSchema.safeParse({
+        ...marketSnapshot,
+        candles: { ...marketSnapshot.candles, [key]: createSeries(wrongTimeframe) },
+      }).success,
+    ).toBe(false);
+  });
+
+  it.each(['quote', 'M5', 'M15', 'H1', 'H4'] as const)(
+    'fails closed when nested %s data is stale or unknown',
+    (target) => {
+      for (const status of ['STALE', 'UNKNOWN'] as const) {
+        const snapshot =
+          target === 'quote'
+            ? { ...marketSnapshot, quote: { ...marketSnapshot.quote, freshness: nonFresh(status) } }
+            : {
+                ...marketSnapshot,
+                candles: {
+                  ...marketSnapshot.candles,
+                  [target]: { ...marketSnapshot.candles[target], freshness: nonFresh(status) },
+                },
+              };
+        expect(
+          VantageRequestSchema.safeParse({ ...vantageRequest, marketSnapshot: snapshot }).success,
+        ).toBe(false);
+      }
+    },
+  );
 
   it.each([
     ['strategy ID', { ...candidate, strategyId: 'UNSUPPORTED' }],
@@ -74,6 +206,11 @@ describe('VANTAGE protocol schemas', () => {
 
   it('rejects malformed AI output, missing fields, and fabricated geometry', () => {
     expect(VantageDecisionSchema.safeParse({ ...decision, score: Number.NaN }).success).toBe(false);
+    expect(VantageDecisionSchema.safeParse({ ...decision, score: -1 }).success).toBe(false);
+    expect(VantageDecisionSchema.safeParse({ ...decision, score: 101 }).success).toBe(false);
+    expect(
+      VantageDecisionSchema.safeParse({ ...decision, timestamp: 'not-a-timestamp' }).success,
+    ).toBe(false);
     expect(VantageDecisionSchema.safeParse({ ...decision, risks: undefined }).success).toBe(false);
     expect(
       VantageDecisionSchema.safeParse({ ...decision, entryZone: candidate.entryZone }).success,
@@ -97,5 +234,11 @@ describe('VANTAGE protocol schemas', () => {
     expect(
       validateVantageDecision(candidate, decision, new Date('2026-09-23T12:01:00.000Z')),
     ).toMatchObject({ success: true, data: decision });
+  });
+
+  it.each(['REJECT', 'WATCH', 'SIGNAL'] as const)('accepts a valid %s decision', (decisionType) => {
+    expect(VantageDecisionSchema.safeParse({ ...decision, decision: decisionType }).success).toBe(
+      true,
+    );
   });
 });

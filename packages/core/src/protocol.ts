@@ -146,6 +146,17 @@ export const MarketSnapshotSchema = z
         message: 'Snapshot data must use the snapshot symbol.',
       });
     }
+    (Object.entries(value.candles) as Array<[keyof typeof value.candles, CandleSeries]>).forEach(
+      ([timeframe, series]) => {
+        if (series.timeframe !== timeframe) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Snapshot candles.${timeframe} must contain ${timeframe} series data.`,
+            path: ['candles', timeframe, 'timeframe'],
+          });
+        }
+      },
+    );
   });
 
 export const SessionContextSchema = z
@@ -332,6 +343,11 @@ export const VantageRequestSchema = z
     if (
       [
         value.marketSnapshot.freshness,
+        value.marketSnapshot.quote.freshness,
+        value.marketSnapshot.candles.M5.freshness,
+        value.marketSnapshot.candles.M15.freshness,
+        value.marketSnapshot.candles.H1.freshness,
+        value.marketSnapshot.candles.H4.freshness,
         value.technicalContext.freshness,
         value.smcContext.freshness,
         value.fundamentalContext.freshness,
